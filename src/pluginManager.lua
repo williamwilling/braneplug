@@ -5,6 +5,5 @@ return {
   version = 1,
 
   onRegister = function (self)
-    
   end
 }
