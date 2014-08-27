@@ -1,0 +1,2 @@
+zerobrane-pluginmanager
+=======================
