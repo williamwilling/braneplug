@@ -1,2 +1,2 @@
-zerobrane-pluginmanager
-=======================
+#Plugin Manager for ZeroBrane Studio
+
