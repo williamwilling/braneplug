@@ -1,8 +1,8 @@
 require 'copas'
 local http = require 'socket.http'
 
-local installer = {
-  download = function (source, target)
+local Installer = {
+  download = function(source, target)
     local contents = http.request(source)
     local file = io.open(target, "w")
     file:write(contents)
@@ -10,36 +10,43 @@ local installer = {
   end
 }
 
-local function fetchRepository(url)
-  local source = http.request(url)
-  return assert(loadstring(source))()
+local Plugin = {}
+Plugin.__index = Plugin
+
+function Plugin:install()
+  local script = http.request(self.url)
+  local installer = assert(loadstring(script))()
+
+  setfenv(installer.install, Installer)
+  installer:install()
 end
 
-local function installPlugin(url)
-  local source = http.request(url)
-  local plugin = assert(loadstring(source))()
+local braneplug = {}
+
+function braneplug:fetch()
+  local source = http.request("http://zerobranestore.blob.core.windows.net/repository/zbrepository.lua")
+  local repository = assert(loadstring(source))()
   
-  installer.idePath = ide.editorFilename:match(".*\\")
-  setfenv(plugin.install, installer)
-  plugin.install()
+  for name, plugin in pairs(repository.plugins) do
+    plugin.name = name
+    setmetatable(plugin, Plugin)
+  end 
+  
+  self.plugins = repository.plugins
 end
 
 return {
-  name = "Plugin Manager",
+  name = "Brane Plug",
   description = "A plugin manager for ZeroBrane Studio.",
   author = "William Willing",
   version = 1,
 
-  onRegister = function (self)
-    local repository = fetchRepository("http://zerobranestore.blob.core.windows.net/repository/zbrepository.lua")
-    
-    for name, plugin in pairs(repository.plugins) do
-      plugin.name = name
-      plugin.install = function (self)
-        installPlugin(self.url)
-      end
-      
-      print(plugin.name)
-    end
+  onRegister = function(self)
+    Installer.idePath = ide.editorFilename:match(".*\\")    -- Let the installers know where ZeroBrane Studio is located.
+    ide:AddConsoleAlias("braneplug", braneplug)             -- Make the plugin manager accessible from the local console.
+  end,
+  
+  onUnRegister = function(self)
+    ide:RemoveConsoleAlias("braneplug")
   end
 }
