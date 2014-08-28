@@ -10,15 +10,6 @@ local installer = {
   end
 }
 
-local installScript = [[
-  return {
-    install = function ()
-      local remotePath = "http://williamwilling.typepad.com/"
-      download(remotePath .. "", idePath .. "packages/test.lua")
-    end
-  }
-]]
-
 return {
   name = "Plugin Manager",
   description = "A plugin manager for ZeroBrane Studio.",
@@ -26,7 +17,9 @@ return {
   version = 1,
 
   onRegister = function (self)
-    local plugin = assert(loadstring(installScript))()
+    local source = http.request("http://zerobranestore.blob.core.windows.net/davinci/zbplugin.lua")
+    local plugin = assert(loadstring(source))()
+    
     installer.idePath = ide.editorFilename:match(".*\\")
     setfenv(plugin.install, installer)
     plugin.install()
