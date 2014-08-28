@@ -1,2 +1,3 @@
-#Plugin Manager for ZeroBrane Studio
+# Brane Plug
 
+A plugin manager for ZeroBrane Studio.
