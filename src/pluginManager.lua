@@ -10,6 +10,20 @@ local installer = {
   end
 }
 
+local function fetchRepository(url)
+  local source = http.request(url)
+  return assert(loadstring(source))()
+end
+
+local function installPlugin(url)
+  local source = http.request(url)
+  local plugin = assert(loadstring(source))()
+  
+  installer.idePath = ide.editorFilename:match(".*\\")
+  setfenv(plugin.install, installer)
+  plugin.install()
+end
+
 return {
   name = "Plugin Manager",
   description = "A plugin manager for ZeroBrane Studio.",
@@ -17,11 +31,15 @@ return {
   version = 1,
 
   onRegister = function (self)
-    local source = http.request("http://zerobranestore.blob.core.windows.net/davinci/zbplugin.lua")
-    local plugin = assert(loadstring(source))()
+    local repository = fetchRepository("http://zerobranestore.blob.core.windows.net/repository/zbrepository.lua")
     
-    installer.idePath = ide.editorFilename:match(".*\\")
-    setfenv(plugin.install, installer)
-    plugin.install()
+    for name, plugin in pairs(repository.plugins) do
+      plugin.name = name
+      plugin.install = function (self)
+        installPlugin(self.url)
+      end
+      
+      print(plugin.name)
+    end
   end
 }
