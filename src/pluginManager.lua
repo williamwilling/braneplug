@@ -13,7 +13,7 @@ local Installer = {
 local Plugin = {}
 Plugin.__index = Plugin
 
-function Plugin:install()
+function Plugin:Install()
   local script = http.request(self.url)
   local installer = assert(loadstring(script))()
 
@@ -23,7 +23,7 @@ end
 
 local braneplug = {}
 
-function braneplug:fetch()
+function braneplug:Fetch()
   local source = http.request("http://zerobranestore.blob.core.windows.net/repository/zbrepository.lua")
   local repository = assert(loadstring(source))()
   
