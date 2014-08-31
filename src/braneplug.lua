@@ -21,6 +21,32 @@ function Plugin:Install()
   installer:install()
 end
 
+local gui = {}
+
+function gui:Initialize()
+  self.CreateMenuItem()
+end
+
+function gui:CreateMenuItem()
+  local editMenu = ide:GetMenuBar():GetMenu(ide:GetMenuBar():FindMenu(TR("&Edit")))
+  local menuItem = editMenu:Append(wx.wxID_ANY, "Plugins...")
+  ide:GetMainFrame():Connect(menuItem:GetId(), wx.wxEVT_COMMAND_MENU_SELECTED, function()
+      gui:CreateFrame()
+  end)
+end
+
+function gui:CreateFrame()
+  self.frame = wx.wxFrame(
+    wx.NULL,
+    wx.wxID_ANY,
+    'Brane Plug',
+    wx.wxDefaultPosition,
+    wx.wxDefaultSize,
+    wx.wxDEFAULT_FRAME_STYLE)
+  
+  self.frame:Show(true)
+end
+
 local braneplug = {}
 
 function braneplug:Fetch()
@@ -44,6 +70,7 @@ return {
   onRegister = function(self)
     Installer.idePath = ide.editorFilename:match(".*\\")    -- Let the installers know where ZeroBrane Studio is located.
     ide:AddConsoleAlias("braneplug", braneplug)             -- Make the plugin manager accessible from the local console.
+    gui:Initialize()
   end,
   
   onUnRegister = function(self)
