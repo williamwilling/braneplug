@@ -62,9 +62,9 @@ function gui:CreateFrame()
     wx.wxLC_REPORT + wx.wxLC_SINGLE_SEL)
   
   plugins:InsertColumn(0, "Name")
-  plugins:InsertColumn(1, "Author")
-  plugins:InsertColumn(2, "Version")
-  plugins:InsertColumn(3, "Description")
+  plugins:InsertColumn(1, "Version")
+  plugins:InsertColumn(2, "Description")
+  plugins:InsertColumn(3, "Author")
   
   local buttons = wx.wxPanel(panel, wx.wxID_ANY)
   local install = wx.wxButton(buttons, wx.wxID_ANY, "Install")
@@ -102,12 +102,25 @@ end
 function gui:LoadPlugins()
   braneplug:Fetch()
   
+  local function string(value)
+    if value then
+      return tostring(value)
+    else
+      return ""
+    end
+  end
+  
   for name, plugin in pairs(braneplug.plugins) do
     local item = gui.plugins:InsertItem(0, plugin.name)
-    gui.plugins:SetItem(item, 1, plugin.author or "")
-    gui.plugins:SetItem(item, 2, plugin.version or "")
-    gui.plugins:SetItem(item, 3, plugin.description or "")
+    gui.plugins:SetItem(item, 1, string(plugin.version))
+    gui.plugins:SetItem(item, 2, string(plugin.description))
+    gui.plugins:SetItem(item, 3, string(plugin.author))
   end
+  
+  gui.plugins:SetColumnWidth(0, wx.wxLIST_AUTOSIZE)
+  gui.plugins:SetColumnWidth(1, wx.wxLIST_AUTOSIZE_USEHEADER)
+  gui.plugins:SetColumnWidth(2, wx.wxLIST_AUTOSIZE)
+  gui.plugins:SetColumnWidth(3, wx.wxLIST_AUTOSIZE)
 end
 
 function gui.onPluginSelected(args)
