@@ -30,7 +30,7 @@ function braneplug:Fetch()
   for name, plugin in pairs(repository.plugins) do
     plugin.name = name
     setmetatable(plugin, Plugin)
-  end 
+  end
   
   self.plugins = repository.plugins
 end
@@ -51,29 +51,70 @@ function gui:CreateMenuItem()
 end
 
 function gui:CreateFrame()
-  self.frame = wx.wxFrame(
-    wx.NULL,
+  local frame = wx.wxFrame(wx.NULL, wx.wxID_ANY, 'Brane Plug')
+  local panel = wx.wxPanel(frame, wx.wxID_ANY)
+  
+  local plugins = wx.wxListCtrl(
+    panel,
     wx.wxID_ANY,
-    'Brane Plug',
     wx.wxDefaultPosition,
     wx.wxDefaultSize,
-    wx.wxDEFAULT_FRAME_STYLE)
+    wx.wxLC_REPORT + wx.wxLC_SINGLE_SEL)
   
-  self.listBox = wx.wxListBox(
-    self.frame,
-    wx.wxID_ANY)
-  self.frame:Show(true)
+  plugins:InsertColumn(0, "Name")
+  plugins:InsertColumn(1, "Author")
+  plugins:InsertColumn(2, "Version")
+  plugins:InsertColumn(3, "Description")
+  
+  local buttons = wx.wxPanel(panel, wx.wxID_ANY)
+  local install = wx.wxButton(buttons, wx.wxID_ANY, "Install")
+  local remove = wx.wxButton(buttons, wx.wxID_ANY, "Remove")
+  install:Disable()
+  remove:Hide()
+  
+  local frameSizer = wx.wxBoxSizer(wx.wxVERTICAL)
+  frameSizer:Add(plugins, 1, wx.wxEXPAND)
+  frameSizer:Add(buttons, 0, wx.wxALIGN_CENTER_HORIZONTAL)
+  
+  local buttonSizer = wx.wxBoxSizer(wx.wxHORIZONTAL)
+  buttonSizer:Add(install, 0, wx.wxALL + wx.wxALIGN_LEFT, 4)
+  buttonSizer:Add(remove, 0, wx.wxALL + wx.wxALIGN_RIGHT, 4)
+  
+  buttons:SetSizer(buttonSizer)
+  panel:SetSizerAndFit(frameSizer)
+  
+  plugins:Connect(wx.wxEVT_COMMAND_LIST_ITEM_SELECTED, function(event)
+    install:Enable(true)
+  end)
+
+  install:Connect(wx.wxEVT_COMMAND_BUTTON_CLICKED, function(event)
+    local selected = plugins:GetNextItem(-1, wx.wxLIST_NEXT_ALL, wx.wxLIST_STATE_SELECTED)
+    local name = plugins:GetItemText(selected)
+    local plugin = braneplug.plugins[name]
+    plugin:Install()
+  end)
+  
+  frame:Show()
+  
+  gui.plugins = plugins
 end
 
 function gui:LoadPlugins()
   braneplug:Fetch()
   
-  local plugins = {}
-  for plugin in pairs(braneplug.plugins) do
-    table.insert(plugins, plugin)
+  for name, plugin in pairs(braneplug.plugins) do
+    local item = gui.plugins:InsertItem(0, plugin.name)
+    gui.plugins:SetItem(item, 1, plugin.author or "")
+    gui.plugins:SetItem(item, 2, plugin.version or "")
+    gui.plugins:SetItem(item, 3, plugin.description or "")
   end
-  
-  self.listBox:InsertItems(plugins, 0)
+end
+
+function gui.onPluginSelected(args)
+  local plugin = braneplug.plugins[args:GetString()]
+  gui.name:SetLabel(plugin.name)
+  gui.author:SetLabel(plugin.author or "")
+  gui.description:SetLabel(plugin.description or "")
 end
 
 return {
