@@ -51,7 +51,7 @@ function gui:CreateMenuItem()
 end
 
 function gui:CreateFrame()
-  local frame = wx.wxFrame(wx.NULL, wx.wxID_ANY, 'Brane Plug')
+  local frame = wx.wxFrame(ide:GetMainFrame(), wx.wxID_ANY, 'Brane Plug', wx.wxDefaultPosition, wx.wxDefaultSize, wx.wxCAPTION + wx.wxCLOSE_BOX + wx.wxRESIZE_BORDER + wx.wxFRAME_NO_TASKBAR + wx.wxFRAME_FLOAT_ON_PARENT)
   local panel = wx.wxPanel(frame, wx.wxID_ANY)
   
   local plugins = wx.wxListCtrl(
