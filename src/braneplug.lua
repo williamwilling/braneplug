@@ -21,32 +21,6 @@ function Plugin:Install()
   installer:install()
 end
 
-local gui = {}
-
-function gui:Initialize()
-  self.CreateMenuItem()
-end
-
-function gui:CreateMenuItem()
-  local editMenu = ide:GetMenuBar():GetMenu(ide:GetMenuBar():FindMenu(TR("&Edit")))
-  local menuItem = editMenu:Append(wx.wxID_ANY, "Plugins...")
-  ide:GetMainFrame():Connect(menuItem:GetId(), wx.wxEVT_COMMAND_MENU_SELECTED, function()
-      gui:CreateFrame()
-  end)
-end
-
-function gui:CreateFrame()
-  self.frame = wx.wxFrame(
-    wx.NULL,
-    wx.wxID_ANY,
-    'Brane Plug',
-    wx.wxDefaultPosition,
-    wx.wxDefaultSize,
-    wx.wxDEFAULT_FRAME_STYLE)
-  
-  self.frame:Show(true)
-end
-
 local braneplug = {}
 
 function braneplug:Fetch()
@@ -59,6 +33,47 @@ function braneplug:Fetch()
   end 
   
   self.plugins = repository.plugins
+end
+
+local gui = {}
+
+function gui:Initialize()
+  self.CreateMenuItem()
+end
+
+function gui:CreateMenuItem()
+  local editMenu = ide:GetMenuBar():GetMenu(ide:GetMenuBar():FindMenu(TR("&Edit")))
+  local menuItem = editMenu:Append(wx.wxID_ANY, "Plugins...")
+  ide:GetMainFrame():Connect(menuItem:GetId(), wx.wxEVT_COMMAND_MENU_SELECTED, function()
+      gui:CreateFrame()
+      gui:LoadPlugins()
+  end)
+end
+
+function gui:CreateFrame()
+  self.frame = wx.wxFrame(
+    wx.NULL,
+    wx.wxID_ANY,
+    'Brane Plug',
+    wx.wxDefaultPosition,
+    wx.wxDefaultSize,
+    wx.wxDEFAULT_FRAME_STYLE)
+  
+  self.listBox = wx.wxListBox(
+    self.frame,
+    wx.wxID_ANY)
+  self.frame:Show(true)
+end
+
+function gui:LoadPlugins()
+  braneplug:Fetch()
+  
+  local plugins = {}
+  for plugin in pairs(braneplug.plugins) do
+    table.insert(plugins, plugin)
+  end
+  
+  self.listBox:InsertItems(plugins, 0)
 end
 
 return {
