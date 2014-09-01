@@ -1,5 +1,6 @@
 require 'copas'
 local http = require 'socket.http'
+local lfs = require 'lfs'
 
 local function ensureDir(path)
   local part, index = path:match("([/\\]?[^/\\]+[/\\])()")
