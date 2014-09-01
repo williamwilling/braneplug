@@ -1,9 +1,22 @@
 require 'copas'
 local http = require 'socket.http'
 
+local function ensureDir(path)
+  local part, index = path:match("([/\\]?[^/\\]+[/\\])()")
+  local subPath = ""
+  
+  while part do
+    subPath = subPath .. part
+    lfs.mkdir(subPath)
+    part, index = path:match("([^/\\]+[/\\])()", index)
+  end
+end
+
 local Installer = {
   download = function(source, target)
     local contents = http.request(source)
+    
+    ensureDir(target)
     local file = io.open(target, "w")
     file:write(contents)
     file:close()
