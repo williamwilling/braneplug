@@ -160,13 +160,6 @@ function gui:LoadPlugins()
   gui.plugins:SetColumnWidth(4, wx.wxLIST_AUTOSIZE)
 end
 
-function gui.onPluginSelected(args)
-  local plugin = braneplug.plugins[args:GetString()]
-  gui.name:SetLabel(plugin.name)
-  gui.author:SetLabel(plugin.author or "")
-  gui.description:SetLabel(plugin.description or "")
-end
-
 return {
   name = "Brane Plug",
   description = "A plugin manager for ZeroBrane Studio.",
