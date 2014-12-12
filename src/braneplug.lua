@@ -59,8 +59,8 @@ function gui:CreateMenuItem()
   local editMenu = ide:GetMenuBar():GetMenu(ide:GetMenuBar():FindMenu(TR("&Edit")))
   local menuItem = editMenu:Append(wx.wxID_ANY, "Plugins...")
   ide:GetMainFrame():Connect(menuItem:GetId(), wx.wxEVT_COMMAND_MENU_SELECTED, function()
-      gui:CreateFrame()
-      gui:LoadPlugins()
+    gui:CreateFrame()
+    gui:LoadPlugins()
   end)
 end
 
@@ -75,10 +75,16 @@ function gui:CreateFrame()
     wx.wxDefaultSize,
     wx.wxLC_REPORT + wx.wxLC_SINGLE_SEL)
   
-  plugins:InsertColumn(0, "Name")
-  plugins:InsertColumn(1, "Version")
-  plugins:InsertColumn(2, "Description")
-  plugins:InsertColumn(3, "Author")
+  plugins:InsertColumn(0, "")
+  plugins:InsertColumn(1, "Name")
+  plugins:InsertColumn(2, "Version")
+  plugins:InsertColumn(3, "Description")
+  plugins:InsertColumn(4, "Author")
+  
+  local images = wx.wxImageList(16, 16, true, 2)
+  images:Add(wx.wxBitmap("packages/installing.png"), wx.wxColour(255, 255, 255))
+  images:Add(wx.wxBitmap("packages/done.png"), wx.wxColour(255, 255, 255))
+  plugins:AssignImageList(images, wx.wxIMAGE_LIST_SMALL)
   
   local buttons = wx.wxPanel(panel, wx.wxID_ANY)
   local install = wx.wxButton(buttons, wx.wxID_ANY, "Install")
@@ -103,9 +109,18 @@ function gui:CreateFrame()
 
   install:Connect(wx.wxEVT_COMMAND_BUTTON_CLICKED, function(event)
     local selected = plugins:GetNextItem(-1, wx.wxLIST_NEXT_ALL, wx.wxLIST_STATE_SELECTED)
-    local name = plugins:GetItemText(selected)
+    local item = wx.wxListItem()
+    item:SetId(selected)
+    item:SetColumn(1)
+    item:SetMask(wx.wxLIST_MASK_TEXT + wx.wxLIST_MASK_IMAGE)
+    plugins:GetItem(item)
+    
+    local name = item:GetText()
     local plugin = braneplug.plugins[name]
+    
+    plugins:SetItemImage(selected, 0)
     plugin:Install()
+    plugins:SetItemImage(selected, 1)
   end)
   
   frame:Show()
@@ -125,16 +140,19 @@ function gui:LoadPlugins()
   end
   
   for name, plugin in pairs(braneplug.plugins) do
-    local item = gui.plugins:InsertItem(0, plugin.name)
-    gui.plugins:SetItem(item, 1, string(plugin.version))
-    gui.plugins:SetItem(item, 2, string(plugin.description))
-    gui.plugins:SetItem(item, 3, string(plugin.author))
+    local item = gui.plugins:InsertItem(0, "")
+    gui.plugins:SetItem(item, 1, string(plugin.name))
+    gui.plugins:SetItem(item, 2, string(plugin.version))
+    gui.plugins:SetItem(item, 3, string(plugin.description))
+    gui.plugins:SetItem(item, 4, string(plugin.author))
+    gui.plugins:SetItemImage(item, -1)
   end
   
-  gui.plugins:SetColumnWidth(0, wx.wxLIST_AUTOSIZE)
-  gui.plugins:SetColumnWidth(1, wx.wxLIST_AUTOSIZE_USEHEADER)
-  gui.plugins:SetColumnWidth(2, wx.wxLIST_AUTOSIZE)
+  gui.plugins:SetColumnWidth(0, 20)
+  gui.plugins:SetColumnWidth(1, wx.wxLIST_AUTOSIZE)
+  gui.plugins:SetColumnWidth(2, wx.wxLIST_AUTOSIZE_USEHEADER)
   gui.plugins:SetColumnWidth(3, wx.wxLIST_AUTOSIZE)
+  gui.plugins:SetColumnWidth(4, wx.wxLIST_AUTOSIZE)
 end
 
 function gui.onPluginSelected(args)
