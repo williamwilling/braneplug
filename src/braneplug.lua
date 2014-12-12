@@ -119,8 +119,13 @@ function gui:CreateFrame()
     local plugin = braneplug.plugins[name]
     
     plugins:SetItemImage(selected, 0)
-    plugin:Install()
-    plugins:SetItemImage(selected, 1)
+    
+    local timer = wx.wxTimer(frame)
+    frame:Connect(wx.wxEVT_TIMER, function()
+      plugin:Install()
+      plugins:SetItemImage(selected, 1)
+    end)
+    timer:Start(0, wx.wxTIMER_ONE_SHOT)
   end)
   
   frame:Show()
