@@ -18,7 +18,7 @@ local Installer = {
     local contents = http.request(source)
     
     ensureDir(target)
-    local file = io.open(target, "w")
+    local file = io.open(target, "wb")
     file:write(contents)
     file:close()
   end
